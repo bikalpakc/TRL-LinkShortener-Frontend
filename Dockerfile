@@ -27,6 +27,9 @@ RUN npm run build
 # 8. Switching to Nginx. We don't need Node.js anymore!
 FROM nginx:stable-alpine as production-stage
 
+# Trivy showed vulnerabitlity for some old version packages. So, This updates Alpine's package manager and upgrades all installed packages.
+RUN apk update && apk upgrade --no-cache
+
 # 9. Taking the 'dist' folder we just created in Stage 1 and  moving it to Nginx's folder where it serves public files.
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 

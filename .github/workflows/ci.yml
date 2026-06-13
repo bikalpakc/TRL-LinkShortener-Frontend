@@ -1,4 +1,4 @@
-name: Frontend CI Pipeline
+name: Frontend CI/CD Pipeline
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
           # Passing the GitHub Secrets as environment variables for the build
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_WS_URL: ${{ secrets.VITE_WS_URL }}
-
+          
           # The --build-arg passes the variables into the Dockerfile
         run: |
           docker build \
@@ -41,24 +41,24 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      # - name: Download and Clean Task Definition
-      #   run: |
-      #     aws ecs describe-task-definition --task-definition trl-frontend-task --query taskDefinition > raw-task-def.json
-      #     # Using jq to remove the 'extra baggage' fields AWS adds
-      #     cat raw-task-def.json | jq 'del(.taskDefinitionArn, .revision, .status, .registeredAt, .registeredBy, .compatibilities, .requiresAttributes, .enableFaultInjection)' > task-definition.json
+      - name: Download and Clean Task Definition
+        run: |
+          aws ecs describe-task-definition --task-definition trl-frontend-task --query taskDefinition > raw-task-def.json
+          # Using jq to remove the 'extra baggage' fields AWS adds
+          cat raw-task-def.json | jq 'del(.taskDefinitionArn, .revision, .status, .registeredAt, .registeredBy, .compatibilities, .requiresAttributes, .enableFaultInjection)' > task-definition.json
 
-      # - name: Fill in the new image ID in the Amazon ECS task definition
-      #   id: task-def
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: task-definition.json
-      #     container-name: frontend
-      #     image: ${{ steps.login-ecr.outputs.registry }}/trl-frontend:${{ github.sha }}
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: frontend
+          image: ${{ steps.login-ecr.outputs.registry }}/trl-frontend:${{ github.sha }}
 
-      # - name: Deploy Amazon ECS task definition
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      #   with:
-      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-      #     service: trl-frontend-service
-      #     cluster: trl-cluster
-      #     wait-for-service-stability: true
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: trl-frontend-service
+          cluster: trl-cluster
+          wait-for-service-stability: true

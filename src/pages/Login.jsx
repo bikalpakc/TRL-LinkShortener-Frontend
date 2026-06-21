@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Scissors, Lock, Mail } from 'lucide-react';
+import { API_ENDPOINTS } from '../api';
 
-const API_URL = "http://localhost:8000/api/users/login/";
+// const API_URL = "http://localhost:8000/api/users/login/";
+const API_URL = API_ENDPOINTS.LOGIN;
 
 export default function Login() {
   const [email, setEmail] = useState('');

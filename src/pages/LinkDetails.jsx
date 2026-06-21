@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Globe, Monitor, Smartphone, BarChart3 } from 'lucide-react';
+import { API_ENDPOINTS } from '../api';
 
 export default function LinkDetails() {
   const { shortCode } = useParams();
@@ -17,8 +18,12 @@ export default function LinkDetails() {
         const headers = { Authorization: `Bearer ${token}` };
         // Note: Check your Django URL trailing slashes! 
         const [clicksRes, summaryRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/analytics/${shortCode}/`, { headers }),
-          axios.get(`http://localhost:8000/api/analytics/${shortCode}/summary/`, { headers })
+          // axios.get(`http://localhost:8000/api/analytics/${shortCode}/`, { headers }),
+          // axios.get(`http://localhost:8000/api/analytics/${shortCode}/summary/`, { headers })
+
+          axios.get(`${API_ENDPOINTS.ANALYTICS}/${shortCode}/`, { headers }),
+          axios.get(`${API_ENDPOINTS.ANALYTICS}/${shortCode}/summary/`, { headers })
+
         ]);
         setClicks(clicksRes.data);
         setSummary(summaryRes.data);
